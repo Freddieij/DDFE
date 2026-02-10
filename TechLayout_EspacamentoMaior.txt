@@ -1,0 +1,223 @@
+let
+    Fonte = tech_map,
+    
+    // 1. PREPARAÇÃO
+    CheckHidden = if Table.HasColumns(Fonte, "IsHidden") then Fonte else Table.AddColumn(Fonte, "IsHidden", each false),
+    #"Colunas Iniciais" = Table.SelectColumns(CheckHidden,{"tech", "fuel_in", "fuel_out", "IsHidden"}),
+    #"Kind Adicionado" = Table.AddColumn(#"Colunas Iniciais", "kind", each "tech"),
+
+    // =======================================================
+    // BLOCO 2: UNIFICAÇÃO & HERANÇA DE COR
+    // =======================================================
+    
+    #"Merge IN" = Table.NestedJoin(#"Kind Adicionado", {"fuel_in"}, FuelLayout, {"fuel"}, "DadosIN", JoinKind.LeftOuter),
+    #"Exp IN" = Table.ExpandTableColumn(#"Merge IN", "DadosIN", 
+        {"stage", "x_fuel", "Fuel_Global_ID"}, 
+        {"stage_in", "x_fuel_in", "ID_Input_Original"}
+    ),
+
+    #"Merge OUT" = Table.NestedJoin(#"Exp IN", {"fuel_out"}, FuelLayout, {"fuel"}, "DadosOUT", JoinKind.LeftOuter),
+    #"Exp OUT" = Table.ExpandTableColumn(#"Merge OUT", "DadosOUT", 
+        {"stage", "x_fuel", "color"}, 
+        {"stage_out", "x_fuel_out", "color_out"}
+    ),
+
+    #"Agrupar Tech" = Table.Group(#"Exp OUT", {"tech"}, {
+        {"Max_Stage_In", each List.Max([stage_in]), type number},
+        {"Min_Stage_Out", each List.Min([stage_out]), type number},
+        {"ID_Raia_Mestra", each Number.Round(List.Average(List.Select([ID_Input_Original], each _ <> null)), 0), Int64.Type},
+        {"tech_color_calculated", each 
+            let 
+                ListaCores = List.RemoveNulls([color_out]),
+                CorFinal = if List.IsEmpty(ListaCores) then "#555555" else List.First(ListaCores)
+            in 
+                CorFinal, type text
+        },
+        {"TodasLinhas", each _, type table}
+    }),
+    
+    #"Expandir Techs" = Table.ExpandTableColumn(#"Agrupar Tech", "TodasLinhas", 
+        {"fuel_in", "fuel_out", "kind", "IsHidden", "x_fuel_in", "x_fuel_out", "color_out"},
+        {"fuel_in", "fuel_out", "kind", "IsHidden", "x_fuel_in", "x_fuel_out", "color_out"}
+    ),
+    
+    #"Recuperar Cor In" = Table.NestedJoin(#"Expandir Techs", {"fuel_in"}, FuelLayout, {"fuel"}, "CorTab", JoinKind.LeftOuter),
+    #"Exp Cor In" = Table.ExpandTableColumn(#"Recuperar Cor In", "CorTab", {"color"}, {"color_in"}),
+
+    // =======================================================
+    // BLOCO 3: CÁLCULO GEOMÉTRICO X (COM ALINHAMENTO DE PRODUCERS)
+    // =======================================================
+
+    StatsPorEstagio = Table.Group(FuelLayout, {"stage"}, {
+        {"ParedeDireita", each List.Max([x_fuel]), type number}, 
+        {"ParedeEsquerda", each List.Min([x_fuel]), type number}
+    }),
+
+    // 1. Índices
+    #"Add Indexes" = Table.AddColumn(#"Exp Cor In", "Indices", each [
+        Prev = if [Min_Stage_Out] <> null then [Min_Stage_Out] - 1 else null,
+        Next = if [Max_Stage_In] <> null then [Max_Stage_In] + 1 else null
+    ]),
+    #"Expand Indexes" = Table.ExpandRecordColumn(#"Add Indexes", "Indices", {"Prev", "Next"}, {"Prev_Stage_Out", "Next_Stage_In"}),
+
+    // 2. Paredes
+    #"Merge Wall IN" = Table.NestedJoin(#"Expand Indexes", {"Max_Stage_In"}, StatsPorEstagio, {"stage"}, "StatsIn", JoinKind.LeftOuter),
+    #"Exp Wall IN" = Table.ExpandTableColumn(#"Merge Wall IN", "StatsIn", {"ParedeDireita", "ParedeEsquerda"}, {"ParedeDireita_IN", "ParedeEsquerda_IN"}),
+
+    #"Merge Wall OUT" = Table.NestedJoin(#"Exp Wall IN", {"Min_Stage_Out"}, StatsPorEstagio, {"stage"}, "StatsOut", JoinKind.LeftOuter),
+    #"Exp Wall OUT" = Table.ExpandTableColumn(#"Merge Wall OUT", "StatsOut", {"ParedeEsquerda"}, {"ParedeEsquerda_OUT"}),
+
+    // Anterior ao Output
+    #"Merge Wall PREV" = Table.NestedJoin(#"Exp Wall OUT", {"Prev_Stage_Out"}, StatsPorEstagio, {"stage"}, "StatsPrev", JoinKind.LeftOuter),
+    #"Exp Wall PREV" = Table.ExpandTableColumn(#"Merge Wall PREV", "StatsPrev", {"ParedeDireita"}, {"ParedeDireita_PREV_OUT"}),
+
+    // Próximo ao Input
+    #"Merge Wall NEXT" = Table.NestedJoin(#"Exp Wall PREV", {"Next_Stage_In"}, StatsPorEstagio, {"stage"}, "StatsNext", JoinKind.LeftOuter),
+    #"Exp Wall NEXT" = Table.ExpandTableColumn(#"Merge Wall NEXT", "StatsNext", {"ParedeEsquerda"}, {"ParedeEsquerda_NEXT_IN"}),
+
+    // 3. Cálculo Mestre X
+    #"x_tech Calculado" = Table.AddColumn(#"Exp Wall NEXT", "x_tech", each Number.Round(
+        if [Max_Stage_In] <> null and [Min_Stage_Out] <> null then 
+            // CASO 1: Tem Input e Output
+            if [Max_Stage_In] >= [Min_Stage_Out] then
+                // 1.1 Backflow
+                if [ParedeDireita_PREV_OUT] <> null then ([ParedeDireita_PREV_OUT] + [ParedeEsquerda_OUT]) / 2 
+                else [ParedeEsquerda_OUT] - 200 
+            else
+                // 1.2 Forward
+                if [ParedeEsquerda_NEXT_IN] <> null then ([ParedeDireita_IN] + [ParedeEsquerda_NEXT_IN]) / 2
+                else [ParedeDireita_IN] + 150
+        
+        else if [Max_Stage_In] <> null and [Min_Stage_Out] = null then
+            // CASO 2: Só tem Input
+            if [ParedeEsquerda_NEXT_IN] <> null then ([ParedeDireita_IN] + [ParedeEsquerda_NEXT_IN]) / 2
+            else [ParedeDireita_IN] + 150
+            
+        else if [Max_Stage_In] = null and [Min_Stage_Out] <> null then
+            // CASO 3: Só tem Output
+            if [ParedeDireita_PREV_OUT] <> null then ([ParedeDireita_PREV_OUT] + [ParedeEsquerda_OUT]) / 2
+            else [ParedeEsquerda_OUT] - 150
+        else 
+            0
+    , 0), type number),
+
+    #"Add IsBackflow" = Table.AddColumn(#"x_tech Calculado", "IsBackflow", each 
+        if [Max_Stage_In] <> null and [Min_Stage_Out] <> null and [Max_Stage_In] >= [Min_Stage_Out] then true else false
+    , type logical),
+
+    // =======================================================
+    // BLOCO 4: CÁLCULO DO EIXO Y (COM GHOST NODES GEOMÉTRICOS)
+    // =======================================================
+    
+    #"Tratar Nulos ID" = Table.AddColumn(#"Add IsBackflow", "Fuel_Global_ID", each if [ID_Raia_Mestra] = null then 999 else [ID_Raia_Mestra], Int64.Type),
+    
+    #"Add X Grid" = Table.AddColumn(#"Tratar Nulos ID", "x_grid", each Number.Round([x_tech] / 50, 0) * 50, Int64.Type),
+
+    #"Add Y Group ID" = Table.AddColumn(#"Add X Grid", "Y_Group_ID", each 
+        [Fuel_Global_ID] * 100 + (if [IsHidden] then 1 else 0), Int64.Type),
+
+    // -----------------------------------------------------------------------
+    // [ATUALIZADO] BLOCO 3.5: GERAÇÃO DE NÓS FANTASMAS (Detecção de Grid)
+    // -----------------------------------------------------------------------
+    
+    // 1. Mapeia todos os Grids que REALMENTE têm caixas (para não criar fantasmas no vazio)
+    ListaGridsOcupados = List.Buffer(List.Distinct(Table.SelectRows(#"Add Y Group ID", each [kind]="tech")[x_grid])),
+
+    // 2. Identifica linhas que viajam grandes distâncias
+    // Consideramos linhas de Output (x_tech -> x_fuel_out) e Input (x_fuel_in -> x_tech)
+    // Aqui focamos no Output que é onde ocorre seu erro (Refinaria -> Diesel)
+    
+    FiltraLongHaul = Table.SelectRows(#"Add Y Group ID", each 
+        [x_fuel_out] <> null and [x_tech] <> null and Number.Abs([x_fuel_out] - [x_tech]) > 70
+    ),
+
+    // 3. Gera "Ghost Grids" para cada linha que atravessa um grid ocupado
+    GeraGhostsGeometricos = Table.AddColumn(FiltraLongHaul, "GhostGrid", each 
+        let
+            Start = List.Min({[x_tech], [x_fuel_out]}),
+            End = List.Max({[x_tech], [x_fuel_out]}),
+            // Seleciona Grids existentes que estão ESTRITAMENTE dentro do caminho da linha
+            // O buffer +25 evita colisão com a própria origem/destino
+            GridsNoCaminho = List.Select(ListaGridsOcupados, (g) => g > (Start + 25) and g < (End - 25))
+        in
+            GridsNoCaminho
+    ),
+
+    ExpandGhosts = Table.ExpandListColumn(GeraGhostsGeometricos, "GhostGrid"),
+    
+    // Filtra apenas se gerou algum ghost
+    GhostsValidos = Table.SelectRows(ExpandGhosts, each [GhostGrid] <> null),
+
+    // 4. Prepara tabela de fantasmas
+    TabelaFantasmas = Table.SelectColumns(GhostsValidos, {"tech", "Y_Group_ID", "Fuel_Global_ID", "GhostGrid"}),
+    RenomeiaFantasmas = Table.RenameColumns(TabelaFantasmas, {{"GhostGrid", "x_grid"}}),
+    
+    // Cria ID único
+    TechFantasmaID = Table.TransformColumns(RenomeiaFantasmas, {
+        {"tech", each _ & "_GHOST_" & Text.NewGuid(), type text}
+    }),
+
+    // 5. União (Flags IsGhost)
+    TabelaRealFlag = Table.SelectColumns(Table.AddColumn(#"Add Y Group ID", "IsGhost", each false), {"tech", "Y_Group_ID", "x_grid", "Fuel_Global_ID", "IsGhost"}),
+    TabelaGhostFlag = Table.AddColumn(TechFantasmaID, "IsGhost", each true),
+    
+    TabelaCombinadaParaCalculoY = Table.Combine({TabelaRealFlag, TabelaGhostFlag}),
+
+    // -----------------------------------------------------------------------
+    // FIM DO BLOCO DE FANTASMAS
+    // -----------------------------------------------------------------------
+
+    #"Distinct Para Altura" = Table.Distinct(Table.SelectColumns(TabelaCombinadaParaCalculoY, {"Y_Group_ID", "x_grid", "tech"})),
+    
+    #"Stats: Agrupado Real" = Table.Group(#"Distinct Para Altura", {"Y_Group_ID", "x_grid"}, {{"DensidadeLocal", each Table.RowCount(_), Int64.Type}}),
+    #"Stats: Maximo Global por Fuel" = Table.Group(#"Stats: Agrupado Real", {"Y_Group_ID"}, {{"AlturaDaRaia", each List.Max([DensidadeLocal]), Int64.Type}}),
+    
+    #"Stats: Ordenado" = Table.Sort(#"Stats: Maximo Global por Fuel", {{"Y_Group_ID", Order.Ascending}}),
+    
+    ListaAlturas = #"Stats: Ordenado"[AlturaDaRaia],
+    PaddingEntreRaias = 0,
+    PosicoesY_Iniciais = List.Accumulate(ListaAlturas, {1}, (estado, atual) => estado & {List.Last(estado) + atual + PaddingEntreRaias}),
+    PosicoesFinais = List.RemoveLastN(PosicoesY_Iniciais, 1),
+    
+    #"Tabela Referencia Y" = Table.FromColumns(Table.ToColumns(#"Stats: Ordenado") & {PosicoesFinais}, Table.ColumnNames(#"Stats: Ordenado") & {"Y_Inicio_Raia"}),
+    
+    #"Merge Com Y Base" = Table.NestedJoin(TabelaCombinadaParaCalculoY, {"Y_Group_ID"}, #"Tabela Referencia Y", {"Y_Group_ID"}, "RefY", JoinKind.LeftOuter),
+    #"Expande Y Base" = Table.ExpandTableColumn(#"Merge Com Y Base", "RefY", {"Y_Inicio_Raia"}, {"Y_Inicio_Raia"}),
+
+    TabelaTechsUnicas = Table.Distinct(Table.SelectColumns(#"Expande Y Base", {"tech", "x_grid", "Fuel_Global_ID", "Y_Inicio_Raia", "IsGhost"})),
+    
+    #"Agrupado Por Coluna X" = Table.Group(TabelaTechsUnicas, {"x_grid"}, {{"Conteudo", each _, type table}}),
+    
+    // AQUI ESTÁ A CORREÇÃO DE PRIORIDADE VISUAL:
+    // Ordenamos por IsGhost ASCENDENTE (False vem antes de True).
+    // Isso garante que a CAIXA REAL ganhe o Rank 0 (Topo), e a linha (Ghost) ganhe o Rank 1 (Baixo), desviando da caixa.
+    #"Y Indexado" = Table.TransformColumns(#"Agrupado Por Coluna X", {{"Conteudo", (t) => 
+            let 
+                Ordenado = Table.Sort(t, {{"Fuel_Global_ID", Order.Ascending}, {"IsGhost", Order.Ascending}, {"tech", Order.Ascending}}), 
+                Indexado = Table.AddIndexColumn(Ordenado, "Local_Rank", 0, 1),
+                CalcY = Table.AddColumn(Indexado, "y_tech_idx", each [Y_Inicio_Raia] + [Local_Rank])
+            in CalcY }}),
+            
+    #"Techs Com Y" = Table.ExpandTableColumn(#"Y Indexado", "Conteudo", {"tech", "y_tech_idx"}, {"tech", "y_tech_idx"}),
+
+    // =======================================================
+    // BLOCO 5: FINALIZAÇÃO (Merge de volta com a original para remover Ghosts)
+    // =======================================================
+    
+    #"Merge Y Automatico" = Table.NestedJoin(#"Add Y Group ID", {"tech"}, #"Techs Com Y", {"tech"}, "DadosY", JoinKind.LeftOuter),
+    #"Expandido Y" = Table.ExpandTableColumn(#"Merge Y Automatico", "DadosY", {"y_tech_idx"}, {"y_tech_idx"}),
+
+    #"Offsets Zerados" = Table.AddColumn(#"Expandido Y", "in_offset", each 0, Int64.Type),
+    #"Offsets Zerados 2" = Table.AddColumn(#"Offsets Zerados", "out_offset", each 0, Int64.Type),
+
+    #"Merge Final X_IN" = Table.NestedJoin(#"Offsets Zerados 2", {"fuel_in"}, FuelLayout, {"fuel"}, "X_IN_Tab", JoinKind.LeftOuter),
+    #"Exp Final X_IN" = Table.ExpandTableColumn(#"Merge Final X_IN", "X_IN_Tab", {"x_fuel"}, {"x_in"}),
+    
+    #"Merge Final X_OUT" = Table.NestedJoin(#"Exp Final X_IN", {"fuel_out"}, FuelLayout, {"fuel"}, "X_OUT_Tab", JoinKind.LeftOuter),
+    #"Exp Final X_OUT" = Table.ExpandTableColumn(#"Merge Final X_OUT", "X_OUT_Tab", {"x_fuel"}, {"x_out"}),
+
+    #"Resultado Final" = Table.SelectColumns(#"Exp Final X_OUT", 
+        {"tech", "fuel_in", "fuel_out", "kind", "x_tech", "y_tech_idx", "in_offset", "out_offset", "x_in", "x_out", "color_in", "color_out", "IsHidden", "tech_color_calculated", "IsBackflow"}
+    )
+in
+    #"Resultado Final"
