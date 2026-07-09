@@ -1,0 +1,20 @@
+# Temporários do Excel / Office
+~$*.xlsx
+~$*.xls
+*.tmp
+
+# Artefatos gerados (reproduzíveis via Generator/generator.py)
+RES_Dados_Caos.xlsx
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Power BI temporários
+*.pbix.tmp
+
+# Sistema
+Thumbs.db
+.DS_Store
