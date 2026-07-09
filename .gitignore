@@ -9,6 +9,9 @@ RES_Dados_Caos.xlsx
 # Bundle reconstruído para auditoria (gerado por build.py)
 _rebuilt.txt
 
+# Contexto/decisões para o Claude — local, não versionado
+/CLAUDE.md
+
 # Python
 __pycache__/
 *.pyc
