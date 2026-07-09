@@ -1,0 +1,1032 @@
+{
+  "$schema": "https://vega.github.io/schema/vega/v5.json",
+  "width": 2100,
+  "height": 3500,
+  "padding": 5,
+  "data": [
+    {
+      "name": "dataset"
+    },
+    {
+      "name": "fuel_hitbox_ds",
+      "source": "dataset",
+      "transform": [
+        {
+          "type": "filter",
+          "expr": "datum.kind === 'fuel' && isValid(datum.x_fuel)"
+        },
+        {
+          "type": "formula",
+          "expr": "topPad + (datum.GlobalMaxY * techRowGap) + bottomPad",
+          "as": "calculated_height"
+        },
+        {
+          "type": "formula",
+          "expr": "topPad",
+          "as": "yTop"
+        }
+      ]
+    },
+    {
+      "name": "fuel_visual_ds",
+      "source": "dataset",
+      "transform": [
+        {
+          "type": "filter",
+          "expr": "datum.kind === 'fuel' && isValid(datum.x_fuel)"
+        },
+        {
+          "type": "formula",
+          "expr": "topPad + (datum.GlobalMaxY * techRowGap) + bottomPad",
+          "as": "calculated_height"
+        },
+        {
+          "type": "formula",
+          "expr": "topPad",
+          "as": "yTop"
+        }
+      ]
+    },
+    {
+      "name": "fuel_text_ds",
+      "source": "dataset",
+      "transform": [
+        {
+          "type": "filter",
+          "expr": "datum.kind === 'fuel' && isValid(datum.x_fuel)"
+        },
+        {
+          "type": "formula",
+          "expr": "topPad",
+          "as": "yTop"
+        }
+      ]
+    },
+    {
+      "name": "input_normal_ds",
+      "source": "dataset",
+      "transform": [
+        {
+          "type": "filter",
+          "expr": "datum.kind === 'tech' && !datum.IsBackflow"
+        },
+        {
+          "type": "formula",
+          "expr": "techRowTop + (datum.y_tech_idx-1)*techRowGap",
+          "as": "yTech"
+        },
+        {
+          "type": "filter",
+          "expr": "isValid(datum.x_in) && isValid(datum.x_tech)"
+        },
+        {
+          "type": "formula",
+          "expr": "datum.color_in",
+          "as": "color"
+        }
+      ]
+    },
+    {
+      "name": "backflow_ds",
+      "source": "dataset",
+      "transform": [
+        {
+          "type": "filter",
+          "expr": "datum.kind === 'tech' && datum.IsBackflow"
+        },
+        {
+          "type": "formula",
+          "expr": "techRowTop + (datum.y_tech_idx-1)*techRowGap",
+          "as": "yTech"
+        },
+        {
+          "type": "formula",
+          "expr": "datum.yTech - (techH * 0.8)",
+          "as": "yBridge"
+        },
+        {
+          "type": "formula",
+          "expr": "datum.x_tech - (techW / 2)",
+          "as": "xBoxEdge"
+        },
+        {
+          "type": "formula",
+          "expr": "datum.x_tech - (techW / 2) - hookGap",
+          "as": "xTurn"
+        },
+        {
+          "type": "filter",
+          "expr": "isValid(datum.x_in) && isValid(datum.x_tech)"
+        },
+        {
+          "type": "formula",
+          "expr": "datum.color_in",
+          "as": "color"
+        }
+      ]
+    },
+    {
+      "name": "output_ds",
+      "source": "dataset",
+      "transform": [
+        {
+          "type": "filter",
+          "expr": "datum.kind === 'tech'"
+        },
+        {
+          "type": "formula",
+          "expr": "techRowTop + (datum.y_tech_idx-1)*techRowGap",
+          "as": "yTech"
+        },
+        {
+          "type": "filter",
+          "expr": "isValid(datum.x_out) && isValid(datum.x_tech)"
+        },
+        {
+          "type": "formula",
+          "expr": "datum.tech_color_calculated",
+          "as": "color"
+        }
+      ]
+    },
+    {
+      "name": "tech_boxes_ds",
+      "source": "dataset",
+      "transform": [
+        {
+          "type": "filter",
+          "expr": "datum.kind === 'tech'"
+        },
+        {
+          "type": "formula",
+          "expr": "techRowTop + (datum.y_tech_idx-1)*techRowGap",
+          "as": "yTech"
+        },
+        {
+          "type": "formula",
+          "expr": "datum.yTech - (techH/2)",
+          "as": "y1"
+        },
+        {
+          "type": "formula",
+          "expr": "datum.yTech + (techH/2)",
+          "as": "y2"
+        },
+        {
+          "type": "formula",
+          "expr": "datum.x_tech - (techW / 2)",
+          "as": "x1_tech"
+        },
+        {
+          "type": "formula",
+          "expr": "datum.x_tech + (techW / 2)",
+          "as": "x2_tech"
+        },
+        {
+          "type": "formula",
+          "expr": "datum.tech_color_calculated",
+          "as": "color"
+        }
+      ]
+    },
+    {
+      "name": "tech_labels_ds",
+      "source": "dataset",
+      "transform": [
+        {
+          "type": "filter",
+          "expr": "datum.kind === 'tech'"
+        },
+        {
+          "type": "formula",
+          "expr": "techRowTop + (datum.y_tech_idx-1)*techRowGap",
+          "as": "yTech"
+        }
+      ]
+    }
+  ],
+  "signals": [
+    {
+      "name": "topPad",
+      "value": 40
+    },
+    {
+      "name": "bottomPad",
+      "value": 20
+    },
+    {
+      "name": "techRowTop",
+      "value": 100
+    },
+    {
+      "name": "techRowGap",
+      "value": 110
+    },
+    {
+      "name": "techH",
+      "value": 55
+    },
+    {
+      "name": "techW",
+      "value": 220
+    },
+    {
+      "name": "hookGap",
+      "value": 30
+    },
+    {
+      "name": "nodeSize",
+      "value": 170
+    },
+    {
+      "name": "xDomain",
+      "value": [
+        0,
+        1200
+      ]
+    },
+    {
+      "name": "yDomain",
+      "value": [
+        0,
+        3500
+      ]
+    },
+    {
+      "name": "sel_fuel_color",
+      "value": null,
+      "on": [
+        {
+          "events": "@fuel_hitbox:click",
+          "update": "datum.color"
+        },
+        {
+          "events": "@fuel_hitbox:dblclick",
+          "update": "null"
+        },
+        {
+          "events": "dblclick[!event.item]",
+          "update": "null"
+        }
+      ]
+    },
+    {
+      "name": "sel_tech_color",
+      "value": null,
+      "on": [
+        {
+          "events": "@tech_box:click",
+          "update": "datum.color"
+        },
+        {
+          "events": "@tech_box:dblclick",
+          "update": "null"
+        },
+        {
+          "events": "dblclick[!event.item]",
+          "update": "null"
+        }
+      ]
+    },
+    {
+      "name": "sel_line_color",
+      "value": null,
+      "on": [
+        {
+          "events": "@input_hitbox:click",
+          "update": "datum.color"
+        },
+        {
+          "events": "@input_hitbox:dblclick",
+          "update": "null"
+        },
+        {
+          "events": "dblclick[!event.item]",
+          "update": "null"
+        }
+      ]
+    },
+    {
+      "name": "sel_line_bf1_color",
+      "value": null,
+      "on": [
+        {
+          "events": "@bf1_hitbox:click",
+          "update": "datum.color"
+        },
+        {
+          "events": "@bf1_hitbox:dblclick",
+          "update": "null"
+        },
+        {
+          "events": "dblclick[!event.item]",
+          "update": "null"
+        }
+      ]
+    },
+    {
+      "name": "sel_line_out_color",
+      "value": null,
+      "on": [
+        {
+          "events": "@output_hitbox:click",
+          "update": "datum.color"
+        },
+        {
+          "events": "@output_hitbox:dblclick",
+          "update": "null"
+        },
+        {
+          "events": "dblclick[!event.item]",
+          "update": "null"
+        }
+      ]
+    }
+  ],
+  "scales": [
+    {
+      "name": "x",
+      "type": "linear",
+      "domain": {
+        "signal": "xDomain"
+      },
+      "range": "width"
+    },
+    {
+      "name": "y",
+      "type": "linear",
+      "domain": {
+        "signal": "yDomain"
+      },
+      "range": [
+        0,
+        {
+          "signal": "height"
+        }
+      ]
+    }
+  ],
+  "axes": [],
+  "marks": [
+    {
+      "name": "fuel_hitbox",
+      "type": "rect",
+      "from": {
+        "data": "fuel_hitbox_ds"
+      },
+      "encode": {
+        "enter": {
+          "width": {
+            "value": 45
+          },
+          "fill": {
+            "value": "rgba(0,0,0,0.0001)"
+          },
+          "tooltip": {
+            "signal": "{stage: datum.stage, fuel: datum.fuel}"
+          },
+          "cursor": {
+            "value": "pointer"
+          }
+        },
+        "update": {
+          "x": {
+            "scale": "x",
+            "field": "x_fuel"
+          },
+          "y": {
+            "scale": "y",
+            "field": "yTop"
+          },
+          "y2": {
+            "scale": "y",
+            "field": "calculated_height"
+          },
+          "opacity": {
+            "value": 1
+          }
+        }
+      }
+    },
+    {
+      "name": "fuel_visual",
+      "type": "rect",
+      "from": {
+        "data": "fuel_visual_ds"
+      },
+      "encode": {
+        "enter": {
+          "width": {
+            "value": 2
+          },
+          "fill": {
+            "field": "color"
+          },
+          "pointerEvents": {
+            "value": "none"
+          }
+        },
+        "update": {
+          "x": {
+            "scale": "x",
+            "field": "x_fuel"
+          },
+          "y": {
+            "scale": "y",
+            "field": "yTop"
+          },
+          "y2": {
+            "scale": "y",
+            "field": "calculated_height"
+          },
+          "opacity": {
+            "signal": "((sel_fuel_color == null && sel_tech_color == null && sel_line_color == null) || (sel_fuel_color != null && datum.color == sel_fuel_color) || (sel_tech_color != null && datum.color == sel_tech_color) || (sel_line_color != null && datum.color == sel_line_color)) ? 1 : 0.02"
+          }
+        }
+      }
+    },
+    {
+      "name": "fuel_text",
+      "type": "text",
+      "from": {
+        "data": "fuel_text_ds"
+      },
+      "encode": {
+        "enter": {
+          "text": {
+            "field": "fuel"
+          },
+          "angle": {
+            "value": 270
+          },
+          "align": {
+            "value": "left"
+          },
+          "baseline": {
+            "value": "middle"
+          },
+          "dx": {
+            "value": 30
+          },
+          "fontSize": {
+            "value": 24
+          },
+          "fontWeight": {
+            "value": "bold"
+          },
+          "fill": {
+            "field": "color"
+          },
+          "pointerEvents": {
+            "value": "none"
+          }
+        },
+        "update": {
+          "x": {
+            "scale": "x",
+            "field": "x_fuel"
+          },
+          "y": {
+            "scale": "y",
+            "field": "yTop"
+          },
+          "opacity": {
+            "signal": "((sel_fuel_color == null && sel_tech_color == null && sel_line_color == null) || (sel_fuel_color != null && datum.color == sel_fuel_color) || (sel_tech_color != null && datum.color == sel_tech_color) || (sel_line_color != null && datum.color == sel_line_color)) ? 1 : 0.02"
+          }
+        }
+      }
+    },
+    {
+      "name": "input_hitbox",
+      "type": "rule",
+      "from": {
+        "data": "input_normal_ds"
+      },
+      "encode": {
+        "enter": {
+          "strokeWidth": {
+            "value": 45
+          },
+          "stroke": {
+            "value": "#000"
+          },
+          "strokeOpacity": {
+            "value": 0.001
+          },
+          "tooltip": {
+            "signal": "{tech: datum.tech, fuel: datum.fuel}"
+          },
+          "cursor": {
+            "value": "pointer"
+          }
+        },
+        "update": {
+          "x": {
+            "scale": "x",
+            "field": "x_in"
+          },
+          "x2": {
+            "scale": "x",
+            "field": "x_tech"
+          },
+          "y": {
+            "scale": "y",
+            "field": "yTech"
+          },
+          "y2": {
+            "scale": "y",
+            "field": "yTech"
+          }
+        }
+      }
+    },
+    {
+      "name": "input_visual",
+      "type": "rule",
+      "from": {
+        "data": "input_normal_ds"
+      },
+      "encode": {
+        "enter": {
+          "strokeWidth": {
+            "value": 2
+          },
+          "stroke": {
+            "field": "tech_color_calculated"
+          },
+          "pointerEvents": {
+            "value": "none"
+          }
+        },
+        "update": {
+          "x": {
+            "scale": "x",
+            "field": "x_in"
+          },
+          "x2": {
+            "scale": "x",
+            "field": "x_tech"
+          },
+          "y": {
+            "scale": "y",
+            "field": "yTech"
+          },
+          "y2": {
+            "scale": "y",
+            "field": "yTech"
+          },
+          "opacity": {
+            "signal": "((sel_fuel_color == null && sel_tech_color == null && sel_line_color == null) || (sel_fuel_color != null && (datum.color_in == sel_fuel_color || datum.color_out == sel_fuel_color)) || (sel_tech_color != null && (datum.color_in == sel_tech_color || datum.color_out == sel_tech_color)) || (sel_line_color != null && (datum.color_in == sel_line_color || datum.color_out == sel_line_color))) ? 1 : 0.02"
+          }
+        }
+      }
+    },
+    {
+      "name": "input_circle",
+      "type": "symbol",
+      "from": {
+        "data": "input_normal_ds"
+      },
+      "encode": {
+        "enter": {
+          "size": {
+            "signal": "nodeSize"
+          },
+          "fill": {
+            "field": "color_in"
+          },
+          "stroke": {
+            "value": "#333"
+          },
+          "pointerEvents": {
+            "value": "none"
+          }
+        },
+        "update": {
+          "x": {
+            "scale": "x",
+            "field": "x_in"
+          },
+          "y": {
+            "scale": "y",
+            "field": "yTech"
+          },
+          "opacity": {
+            "signal": "((sel_fuel_color == null && sel_tech_color == null && sel_line_color == null) || (sel_fuel_color != null && (datum.color_in == sel_fuel_color || datum.color_out == sel_fuel_color)) || (sel_tech_color != null && (datum.color_in == sel_tech_color || datum.color_out == sel_tech_color)) || (sel_line_color != null && (datum.color_in == sel_line_color || datum.color_out == sel_line_color))) ? 1 : 0.02"
+          }
+        }
+      }
+    },
+    {
+      "name": "bf1_hitbox",
+      "type": "rule",
+      "from": {
+        "data": "backflow_ds"
+      },
+      "encode": {
+        "enter": {
+          "strokeWidth": {
+            "value": 20
+          },
+          "stroke": {
+            "value": "#000"
+          },
+          "strokeOpacity": {
+            "value": 0.001
+          },
+          "cursor": {
+            "value": "pointer"
+          }
+        },
+        "update": {
+          "x": {
+            "scale": "x",
+            "field": "x_in"
+          },
+          "y": {
+            "scale": "y",
+            "field": "yTech"
+          },
+          "y2": {
+            "scale": "y",
+            "field": "yBridge"
+          },
+          "opacity": {
+            "signal": "((sel_fuel_color == null && sel_tech_color == null && sel_line_color == null && sel_line_bf1_color == null) || (sel_fuel_color != null && (datum.color_in == sel_fuel_color || datum.color_out == sel_fuel_color)) || (sel_tech_color != null && (datum.color_in == sel_tech_color || datum.color_out == sel_tech_color)) || (sel_line_color != null && (datum.color_in == sel_line_color || datum.color_out == sel_line_color)) || (sel_line_bf1_color != null && (datum.color_in == sel_line_bf1_color || datum.color_out == sel_line_bf1_color))) ? 1 : 0.02"
+          }
+        }
+      }
+    },
+    {
+      "name": "bf_travel",
+      "type": "rule",
+      "from": {
+        "data": "backflow_ds"
+      },
+      "encode": {
+        "enter": {
+          "strokeWidth": {
+            "value": 2
+          },
+          "stroke": {
+            "field": "color_in"
+          },
+          "pointerEvents": {
+            "value": "none"
+          }
+        },
+        "update": {
+          "x": {
+            "scale": "x",
+            "field": "x_in"
+          },
+          "x2": {
+            "scale": "x",
+            "field": "xTurn"
+          },
+          "y": {
+            "scale": "y",
+            "field": "yBridge"
+          },
+          "y2": {
+            "scale": "y",
+            "field": "yBridge"
+          },
+          "opacity": {
+            "signal": "((sel_fuel_color == null && sel_tech_color == null && sel_line_color == null) || (sel_fuel_color != null && (datum.color_in == sel_fuel_color || datum.color_out == sel_fuel_color)) || (sel_tech_color != null && (datum.color_in == sel_tech_color || datum.color_out == sel_tech_color)) || (sel_line_color != null && (datum.color_in == sel_line_color || datum.color_out == sel_line_color))) ? 1 : 0.02"
+          }
+        }
+      }
+    },
+    {
+      "name": "bf_down",
+      "type": "rule",
+      "from": {
+        "data": "backflow_ds"
+      },
+      "encode": {
+        "enter": {
+          "strokeWidth": {
+            "value": 2
+          },
+          "stroke": {
+            "field": "color_in"
+          },
+          "pointerEvents": {
+            "value": "none"
+          }
+        },
+        "update": {
+          "x": {
+            "scale": "x",
+            "field": "xTurn"
+          },
+          "y": {
+            "scale": "y",
+            "field": "yBridge"
+          },
+          "y2": {
+            "scale": "y",
+            "field": "yTech"
+          },
+          "opacity": {
+            "signal": "((sel_fuel_color == null && sel_tech_color == null && sel_line_color == null) || (sel_fuel_color != null && (datum.color_in == sel_fuel_color || datum.color_out == sel_fuel_color)) || (sel_tech_color != null && (datum.color_in == sel_tech_color || datum.color_out == sel_tech_color)) || (sel_line_color != null && (datum.color_in == sel_line_color || datum.color_out == sel_line_color))) ? 1 : 0.02"
+          }
+        }
+      }
+    },
+    {
+      "name": "bf_enter",
+      "type": "rule",
+      "from": {
+        "data": "backflow_ds"
+      },
+      "encode": {
+        "enter": {
+          "strokeWidth": {
+            "value": 2
+          },
+          "stroke": {
+            "field": "color_in"
+          },
+          "pointerEvents": {
+            "value": "none"
+          }
+        },
+        "update": {
+          "x": {
+            "scale": "x",
+            "field": "xTurn"
+          },
+          "x2": {
+            "scale": "x",
+            "field": "xBoxEdge"
+          },
+          "y": {
+            "scale": "y",
+            "field": "yTech"
+          },
+          "y2": {
+            "scale": "y",
+            "field": "yTech"
+          },
+          "opacity": {
+            "signal": "((sel_fuel_color == null && sel_tech_color == null && sel_line_color == null) || (sel_fuel_color != null && (datum.color_in == sel_fuel_color || datum.color_out == sel_fuel_color)) || (sel_tech_color != null && (datum.color_in == sel_tech_color || datum.color_out == sel_tech_color)) || (sel_line_color != null && (datum.color_in == sel_line_color || datum.color_out == sel_line_color))) ? 1 : 0.02"
+          }
+        }
+      }
+    },
+    {
+      "name": "bf_point",
+      "type": "symbol",
+      "from": {
+        "data": "backflow_ds"
+      },
+      "encode": {
+        "enter": {
+          "size": {
+            "signal": "nodeSize"
+          },
+          "fill": {
+            "field": "color_in"
+          },
+          "stroke": {
+            "value": "#333"
+          },
+          "pointerEvents": {
+            "value": "none"
+          }
+        },
+        "update": {
+          "x": {
+            "scale": "x",
+            "field": "x_in"
+          },
+          "y": {
+            "scale": "y",
+            "field": "yBridge"
+          },
+          "opacity": {
+            "signal": "((sel_fuel_color == null && sel_tech_color == null && sel_line_color == null) || (sel_fuel_color != null && (datum.color_in == sel_fuel_color || datum.color_out == sel_fuel_color)) || (sel_tech_color != null && (datum.color_in == sel_tech_color || datum.color_out == sel_tech_color)) || (sel_line_color != null && (datum.color_in == sel_line_color || datum.color_out == sel_line_color))) ? 1 : 0.02"
+          }
+        }
+      }
+    },
+    {
+      "name": "output_hitbox",
+      "type": "rule",
+      "from": {
+        "data": "output_ds"
+      },
+      "encode": {
+        "enter": {
+          "strokeWidth": {
+            "value": 45
+          },
+          "stroke": {
+            "value": "#000"
+          },
+          "strokeOpacity": {
+            "value": 0.001
+          },
+          "tooltip": {
+            "signal": "{tech: datum.tech}"
+          },
+          "cursor": {
+            "value": "pointer"
+          }
+        },
+        "update": {
+          "x": {
+            "scale": "x",
+            "field": "x_tech"
+          },
+          "x2": {
+            "scale": "x",
+            "field": "x_out"
+          },
+          "y": {
+            "scale": "y",
+            "field": "yTech"
+          },
+          "y2": {
+            "scale": "y",
+            "field": "yTech"
+          }
+        }
+      }
+    },
+    {
+      "name": "output_visual",
+      "type": "rule",
+      "from": {
+        "data": "output_ds"
+      },
+      "encode": {
+        "enter": {
+          "strokeWidth": {
+            "value": 2
+          },
+          "stroke": {
+            "field": "tech_color_calculated"
+          },
+          "pointerEvents": {
+            "value": "none"
+          }
+        },
+        "update": {
+          "x": {
+            "scale": "x",
+            "field": "x_tech"
+          },
+          "x2": {
+            "scale": "x",
+            "field": "x_out"
+          },
+          "y": {
+            "scale": "y",
+            "field": "yTech"
+          },
+          "y2": {
+            "scale": "y",
+            "field": "yTech"
+          },
+          "opacity": {
+            "signal": "((sel_fuel_color == null && sel_tech_color == null && sel_line_color == null && sel_line_out_color == null) || (sel_fuel_color != null && (datum.color_in == sel_fuel_color || datum.color_out == sel_fuel_color)) || (sel_tech_color != null && (datum.color_in == sel_tech_color || datum.color_out == sel_tech_color)) || (sel_line_color != null && (datum.color_in == sel_line_color || datum.color_out == sel_line_color)) || (sel_line_out_color != null && (datum.color_in == sel_line_out_color || datum.color_out == sel_line_out_color))) ? 1 : 0.02"
+          }
+        }
+      }
+    },
+    {
+      "name": "output_circle",
+      "type": "symbol",
+      "from": {
+        "data": "output_ds"
+      },
+      "encode": {
+        "enter": {
+          "size": {
+            "signal": "nodeSize"
+          },
+          "fill": {
+            "field": "color_out"
+          },
+          "stroke": {
+            "value": "#333"
+          },
+          "pointerEvents": {
+            "value": "none"
+          }
+        },
+        "update": {
+          "x": {
+            "scale": "x",
+            "field": "x_out"
+          },
+          "y": {
+            "scale": "y",
+            "field": "yTech"
+          },
+          "opacity": {
+            "signal": "((sel_fuel_color == null && sel_tech_color == null && sel_line_color == null && sel_line_out_color == null) || (sel_fuel_color != null && (datum.color_in == sel_fuel_color || datum.color_out == sel_fuel_color)) || (sel_tech_color != null && (datum.color_in == sel_tech_color || datum.color_out == sel_tech_color)) || (sel_line_color != null && (datum.color_in == sel_line_color || datum.color_out == sel_line_color)) || (sel_line_out_color != null && (datum.color_in == sel_line_out_color || datum.color_out == sel_line_out_color))) ? 1 : 0.02"
+          }
+        }
+      }
+    },
+    {
+      "name": "tech_box",
+      "type": "rect",
+      "from": {
+        "data": "tech_boxes_ds"
+      },
+      "encode": {
+        "enter": {
+          "cornerRadius": {
+            "value": 4
+          },
+          "stroke": {
+            "value": "#444"
+          },
+          "strokeWidth": {
+            "value": 1
+          },
+          "fill": {
+            "value": "#f5f7fb"
+          },
+          "cursor": {
+            "value": "pointer"
+          }
+        },
+        "update": {
+          "x": {
+            "scale": "x",
+            "field": "x1_tech"
+          },
+          "x2": {
+            "scale": "x",
+            "field": "x2_tech"
+          },
+          "y": {
+            "scale": "y",
+            "field": "y1"
+          },
+          "y2": {
+            "scale": "y",
+            "field": "y2"
+          },
+          "opacity": {
+            "signal": "(datum.IsHidden === true) ? 0 : (((sel_fuel_color == null && sel_tech_color == null && sel_line_color == null && sel_line_out_color == null) || (sel_fuel_color != null && (datum.color_in == sel_fuel_color || datum.color_out == sel_fuel_color)) || (sel_tech_color != null && (datum.color_in == sel_tech_color || datum.color_out == sel_tech_color)) || (sel_line_color != null && (datum.color_in == sel_line_color || datum.color_out == sel_line_color)) || (sel_line_out_color != null && (datum.color_in == sel_line_out_color || datum.color_out == sel_line_out_color))) ? 1 : 0.02)"
+          }
+        }
+      }
+    },
+    {
+      "name": "tech_label",
+      "type": "text",
+      "from": {
+        "data": "tech_labels_ds"
+      },
+      "encode": {
+        "enter": {
+          "text": {
+            "field": "tech"
+          },
+          "fontSize": {
+            "value": 24
+          },
+          "fontWeight": {
+            "value": "bold"
+          },
+          "align": {
+            "value": "center"
+          },
+          "baseline": {
+            "value": "middle"
+          },
+          "dy": {
+            "value": 0
+          },
+          "fill": {
+            "value": "#1f2937"
+          },
+          "pointerEvents": {
+            "value": "none"
+          }
+        },
+        "update": {
+          "x": {
+            "scale": "x",
+            "field": "x_tech"
+          },
+          "y": {
+            "scale": "y",
+            "field": "yTech"
+          },
+          "opacity": {
+            "signal": "(datum.IsHidden === true) ? 0 : (((sel_fuel_color == null && sel_tech_color == null && sel_line_color == null && sel_line_out_color == null) || (sel_fuel_color != null && (datum.color_in == sel_fuel_color || datum.color_out == sel_fuel_color)) || (sel_tech_color != null && (datum.color_in == sel_tech_color || datum.color_out == sel_tech_color)) || (sel_line_color != null && (datum.color_in == sel_line_color || datum.color_out == sel_line_color)) || (sel_line_out_color != null && (datum.color_in == sel_line_out_color || datum.color_out == sel_line_out_color))) ? 1 : 0.02)"
+          }
+        }
+      }
+    }
+  ]
+}

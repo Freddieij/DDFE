@@ -6,6 +6,9 @@
 # Artefatos gerados (reproduzíveis via Generator/generator.py)
 RES_Dados_Caos.xlsx
 
+# Bundle reconstruído para auditoria (gerado por build.py)
+_rebuilt.txt
+
 # Python
 __pycache__/
 *.pyc
