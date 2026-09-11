@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="525" viewBox="0 90 1000 525" font-family="Segoe UI, Calibri, Arial, sans-serif">
+  <rect x="0" y="90" width="1000" height="525" fill="#ffffff"/>
+
+  <!-- ===================== PAINEL A ===================== -->
+  <text x="30" y="110" font-size="17.5" font-weight="700" fill="#111111">(a) O problema</text>
+  <text x="204" y="110" font-size="15.5" fill="#555555">— a conexão longa atravessa caixas que estão na sua linha</text>
+
+  <g stroke="#d8d8d8" stroke-dasharray="3 4" stroke-width="1">
+    <line x1="200" y1="126" x2="200" y2="186"/><line x1="350" y1="126" x2="350" y2="186"/>
+    <line x1="500" y1="126" x2="500" y2="186"/><line x1="650" y1="126" x2="650" y2="186"/>
+    <line x1="800" y1="126" x2="800" y2="186"/>
+  </g>
+
+  <rect x="100" y="134" width="820" height="40" fill="#eaf2fb" stroke="#b9d2ec"/>
+  <text x="30" y="158" font-size="12.5" fill="#3a6ea5" font-weight="600">raia A</text>
+  <g fill="#ffffff" stroke="#3a6ea5" stroke-width="1.6">
+    <rect x="158" y="142" width="84" height="24" rx="3"/>
+    <rect x="458" y="142" width="84" height="24" rx="3"/>
+    <rect x="608" y="142" width="84" height="24" rx="3"/>
+  </g>
+  <g font-size="12.5" fill="#1d3f5e" text-anchor="middle">
+    <text x="200" y="159">T1</text><text x="500" y="159">T2</text><text x="650" y="159">T3</text>
+  </g>
+  <line x1="242" y1="154" x2="892" y2="154" stroke="#c8102e" stroke-width="2.5"/>
+  <polygon points="898,154 886,148 886,160" fill="#c8102e"/>
+  <g stroke="#c8102e" stroke-width="2.6">
+    <line x1="488" y1="142" x2="512" y2="166"/><line x1="512" y1="142" x2="488" y2="166"/>
+    <line x1="638" y1="142" x2="662" y2="166"/><line x1="662" y1="142" x2="638" y2="166"/>
+  </g>
+
+  <text x="100" y="202" font-size="13.5" fill="#555555">A raia A dispõe de uma única linha. T1, T2 e T3 a compartilham, e a conexão de T1 passa por cima de T2 e T3.</text>
+
+  <!-- ===================== PAINEL B ===================== -->
+  <text x="30" y="250" font-size="17.5" font-weight="700" fill="#111111">(b) A reserva</text>
+  <text x="176" y="250" font-size="15.5" fill="#555555">— o fantasma toma a linha da conexão e empurra as caixas para baixo</text>
+
+  <g stroke="#d8d8d8" stroke-dasharray="3 4" stroke-width="1">
+    <line x1="200" y1="266" x2="200" y2="372"/><line x1="350" y1="266" x2="350" y2="372"/>
+    <line x1="500" y1="266" x2="500" y2="372"/><line x1="650" y1="266" x2="650" y2="372"/>
+    <line x1="800" y1="266" x2="800" y2="372"/>
+  </g>
+
+  <rect x="100" y="270" width="820" height="94" fill="#eaf2fb" stroke="#b9d2ec"/>
+  <text x="30" y="300" font-size="12.5" fill="#3a6ea5" font-weight="600">raia A</text>
+  <text x="30" y="317" font-size="11.5" fill="#3a6ea5">2 linhas</text>
+
+  <g font-size="11.5" fill="#666666" text-anchor="middle" font-style="italic">
+    <text x="500" y="284">fantasma</text><text x="650" y="284">fantasma</text>
+  </g>
+  <rect x="158" y="288" width="84" height="24" rx="3" fill="#ffffff" stroke="#3a6ea5" stroke-width="1.6"/>
+  <text x="200" y="305" font-size="12.5" fill="#1d3f5e" text-anchor="middle">T1</text>
+  <g fill="#f2f2f2" stroke="#8a8a8a" stroke-width="1.4" stroke-dasharray="5 3">
+    <rect x="458" y="288" width="84" height="24" rx="3"/>
+    <rect x="608" y="288" width="84" height="24" rx="3"/>
+  </g>
+  <line x1="242" y1="300" x2="892" y2="300" stroke="#1a7f37" stroke-width="2.5"/>
+  <polygon points="898,300 886,294 886,306" fill="#1a7f37"/>
+
+  <g stroke="#9aa3ae" stroke-width="1.3">
+    <line x1="551" y1="314" x2="551" y2="326"/><line x1="701" y1="314" x2="701" y2="326"/>
+  </g>
+  <g fill="#9aa3ae">
+    <polygon points="551,334 546,324 556,324"/><polygon points="701,334 696,324 706,324"/>
+  </g>
+
+  <g fill="#ffffff" stroke="#3a6ea5" stroke-width="1.6">
+    <rect x="458" y="332" width="84" height="24" rx="3"/>
+    <rect x="608" y="332" width="84" height="24" rx="3"/>
+  </g>
+  <g font-size="12.5" fill="#1d3f5e" text-anchor="middle">
+    <text x="500" y="349">T2</text><text x="650" y="349">T3</text>
+  </g>
+
+  <g stroke="#1a7f37" stroke-width="1.3">
+    <line x1="930" y1="302" x2="930" y2="330"/>
+    <line x1="925" y1="302" x2="935" y2="302"/><line x1="925" y1="330" x2="935" y2="330"/>
+  </g>
+  <text x="941" y="320" font-size="11.5" fill="#1a7f37">folga</text>
+
+  <text x="100" y="390" font-size="13.5" fill="#555555">Os fantasmas não são desenhados; entram na contagem de densidade das colunas que a conexão cruza:</text>
+  <text x="100" y="408" font-size="13.5" fill="#1d3f5e" font-family="Consolas, monospace">QtdItens(raia A, colunas de T2 e T3) = 2 → Altura_Reservada(raia A) = 2</text>
+
+  <!-- ===================== PAINEL C ===================== -->
+  <text x="30" y="458" font-size="17.5" font-weight="700" fill="#111111">(c) O resultado</text>
+  <text x="196" y="458" font-size="15.5" fill="#555555">— a conexão percorre uma linha livre e as caixas ocupam a raia seguinte</text>
+
+  <g stroke="#d8d8d8" stroke-dasharray="3 4" stroke-width="1">
+    <line x1="200" y1="474" x2="200" y2="574"/><line x1="350" y1="474" x2="350" y2="574"/>
+    <line x1="500" y1="474" x2="500" y2="574"/><line x1="650" y1="474" x2="650" y2="574"/>
+    <line x1="800" y1="474" x2="800" y2="574"/>
+  </g>
+
+  <rect x="100" y="482" width="820" height="40" fill="#eaf2fb" stroke="#b9d2ec"/>
+  <text x="30" y="506" font-size="12.5" fill="#3a6ea5" font-weight="600">raia A</text>
+  <rect x="158" y="490" width="84" height="24" rx="3" fill="#ffffff" stroke="#3a6ea5" stroke-width="1.6"/>
+  <text x="200" y="507" font-size="12.5" fill="#1d3f5e" text-anchor="middle">T1</text>
+  <line x1="242" y1="502" x2="892" y2="502" stroke="#1a7f37" stroke-width="2.5"/>
+  <polygon points="898,502 886,496 886,508" fill="#1a7f37"/>
+
+  <rect x="100" y="530" width="820" height="40" fill="#fdeee7" stroke="#f0c9b4"/>
+  <text x="30" y="554" font-size="12.5" fill="#b4531f" font-weight="600">raia B</text>
+  <g fill="#ffffff" stroke="#b4531f" stroke-width="1.6">
+    <rect x="458" y="538" width="84" height="24" rx="3"/>
+    <rect x="608" y="538" width="84" height="24" rx="3"/>
+  </g>
+  <g font-size="12.5" fill="#6e3212" text-anchor="middle">
+    <text x="500" y="555">T2</text><text x="650" y="555">T3</text>
+  </g>
+
+  <text x="100" y="594" font-size="13.5" fill="#555555">T1 fica sozinha na sua linha, com o percurso desobstruído, e T2 e T3 passam a ocupar a raia seguinte.</text>
+</svg>
