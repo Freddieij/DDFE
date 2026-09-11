@@ -9,6 +9,9 @@ RES_Dados_Caos.xlsx
 # Bundle reconstruído para auditoria (gerado por build.py)
 _rebuilt.txt
 
+# Prévias em PNG do relatório (geradas por typst --format png, só para conferência)
+Relatorio/_previa/
+
 # Contexto/decisões para o Claude — local, não versionado
 /CLAUDE.md
 
