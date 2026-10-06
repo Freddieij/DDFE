@@ -27,3 +27,6 @@ venv/
 # Sistema
 Thumbs.db
 .DS_Store
+
+# Imagens intermediárias geradas por Apresentacao/gera_apresentacao.py
+Apresentacao/_assets/
