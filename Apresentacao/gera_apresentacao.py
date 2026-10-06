@@ -524,7 +524,7 @@ def interatividade(prs):
 def validacao(prs):
     s = novo_slide(prs, "Resultados", "Validação em sistema nacional estilizado", (
         "[~45 s] A ferramenta foi validada num sistema energético nacional estilizado com 70 "
-        "combustíveis em 5 estágios, 101 tecnologias e 106 arestas, incluindo 25 "
+        "combustíveis em 5 estágios, 101 tecnologias e 106 ligações declaradas na planilha, incluindo 25 "
         "tecnologias-fonte e 4 fluxos reversos. Também foi testada com bases de topologia "
         "aleatória, com casos patológicos, para confirmar que o layout não depende deste "
         "sistema específico. A figura é só um recorte: o diagrama inteiro tem milhares de "
@@ -533,12 +533,12 @@ def validacao(prs):
         "com o modelo passa a custar praticamente zero."))
     pic, w, h = figura(s, FIG / "Figura7.png", X0, 1.95, h=4.45, nome="Panorama")
     texto(s, X0, 1.95 + h + 0.06, w, 0.3,
-          ["Recorte do diagrama gerado: combustíveis primários e secundários"],
+          ["Recorte do diagrama gerado automaticamente"],
           tam=11, cor=CINZA_TXT, alinhar=PP_ALIGN.CENTER)
     xd = X0 + w + 0.4
     wd = X0 + LARG - xd
     stats = [("70", "combustíveis"), ("5", "estágios"), ("101", "tecnologias"),
-             ("106", "arestas"), ("4", "fluxos reversos"), ("0", "coordenadas à mão")]
+             ("106", "ligações declaradas"), ("4", "fluxos reversos"), ("0", "coordenadas à mão")]
     wc, hc, g = (wd - 0.2) / 2, 0.95, 0.15
     for i, (n, rot) in enumerate(stats):
         x = xd + (i % 2) * (wc + 0.2)
