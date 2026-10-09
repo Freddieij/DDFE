@@ -30,3 +30,7 @@ Thumbs.db
 
 # Imagens intermediárias geradas por Apresentacao/gera_apresentacao.py
 Apresentacao/_assets/
+
+# Notas pessoais e contexto de IA: ficam só na máquina local
+pauta.txt
+Prompt_de_Transicao.txt

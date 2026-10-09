@@ -39,8 +39,6 @@ RES_Dados_*.xlsx    PowerQuery/*.pq       Deneb/RES_FlowDiagram.json
 | `RES_Dados_Nome.xlsx` | Variante da fonte com nomes completos dos combustíveis. |
 | `Generator/generator.py` | Gera `RES_Dados_Caos.xlsx` (dados aleatórios de stress-test). |
 | `TechLayout_EspacamentoMaior.txt` | Variante alternativa do algoritmo de layout (abordagem *Ghost Nodes* geométricos). |
-| `Prompt_de_Transicao.txt` | Prompt de handoff/contexto do projeto para continuidade com IA. |
-| `pauta.txt` | Notas das reuniões com o orientador. |
 | `cadeias.png` | Captura do diagrama. |
 | `Documentacao/` | PDFs: Guia do Usuário, Tutorial do Desenvolvedor, Resumo de Resultados. |
 
