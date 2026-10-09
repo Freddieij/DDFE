@@ -29,7 +29,7 @@ TITULO_PROJETO = ("Computação Paralela Aplicada à Simulação Estocástica de
                   "Elétricas com Recursos Energéticos Distribuídos")
 BOLSISTA = "Frederico José Poli Antunes"
 ORIENTADOR = "Prof. Tiago Pires Abud"
-REPO = "github.com/Freddieij/Power_BI_Borba"
+REPO = "github.com/Freddieij/DDFE"
 
 # Paleta derivada do template: o azul da capa domina; cinza-claro é o lt2 do tema.
 AZUL = RGBColor(0x0B, 0x53, 0x94)
@@ -440,10 +440,7 @@ def objetivos(prs):
                                    "de retorno"]),
         ("Interatividade", ["Um clique isola a cadeia energética correspondente"]),
         ("Código auditável", ["Versionado como texto e documentado:",
-                              [("github.com/Freddieij/",
-                                {"link": "https://" + REPO, "cor": AZUL, "tam": 13})],
-                              [("Power_BI_Borba",
-                                {"link": "https://" + REPO, "cor": AZUL, "tam": 13})]]),
+                              [(REPO, {"link": "https://" + REPO, "cor": AZUL, "tam": 13})]]),
     ]
     wc = 2.6
     gap = (LARG - 4 * wc) / 3
