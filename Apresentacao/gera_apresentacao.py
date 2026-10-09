@@ -65,10 +65,11 @@ X0, LARG = 1.0, 11.33  # coluna de conteúdo alinhada ao texto do título
 
 
 # ----------------------------------------------------------------------------- imagens
-# Recorte da Figura 4: a linha de retorno atravessa a figura inteira, e o trecho do meio
-# só tem linhas horizontais. Suprimi-lo (com marca de corte) deixa o texto ~3x maior.
+# Recorte da Figura 4: a linha de retorno atravessa a figura inteira. Suprimir o trecho do
+# meio deixa o texto ~3x maior; o vão fica sinalizado (faixa cinza + linhas pontilhadas +
+# legenda "trecho omitido" no slide) para não ser lido como parte do diagrama.
 F4_ESQ, F4_DIR, F4_Y = (0, 440), (1025, 1176), (318, 425)
-F4_VAO = 14
+F4_VAO = 60
 F4_X_TERMICAS, F4_X_ELETRICIDADE, F4_X_GAS = 152, 359, 1047
 F4_ESCALA = 3
 
@@ -96,13 +97,29 @@ def prepara_imagens():
     montada = Image.new("RGB", (esq.width + F4_VAO + dir_.width, alt), "white")
     montada.paste(esq, (0, 0))
     montada.paste(dir_, (esq.width + F4_VAO, 0))
+    # Linhas que atravessam o corte: linhas coloridas presentes nas duas bordas do vão.
+    def colorido(px):
+        r, g, b = px
+        return max(r, g, b) - min(r, g, b) > 60
+    linhas_vao, y = [], 0
+    while y < alt:
+        if colorido(esq.getpixel((esq.width - 1, y))) and colorido(dir_.getpixel((0, y))):
+            y0 = y
+            while y < alt and colorido(esq.getpixel((esq.width - 1, y))):
+                y += 1
+            linhas_vao.append(((y0 + y - 1) / 2, esq.getpixel((esq.width - 1, y0))))
+        y += 1
+
     montada = montada.resize((montada.width * F4_ESCALA, alt * F4_ESCALA), Image.LANCZOS)
-    # marca de corte "//" no vão, desenhada já na escala final para sair nítida
+    # Sinalização do vão, desenhada já na escala final para sair nítida
     d = ImageDraw.Draw(montada)
-    x_vao = esq.width * F4_ESCALA
-    alt_f = alt * F4_ESCALA
-    for dx in (8, 24):
-        d.line([(x_vao + dx - 6, alt_f - 40), (x_vao + dx + 10, 40)], fill=(140, 140, 140), width=5)
+    x0_vao = esq.width * F4_ESCALA
+    x1_vao = x0_vao + F4_VAO * F4_ESCALA
+    d.rectangle([x0_vao, 0, x1_vao, alt * F4_ESCALA], fill=(236, 236, 236))
+    for y_lin, cor in linhas_vao:
+        yy = y_lin * F4_ESCALA
+        for x in range(x0_vao + 6, x1_vao - 6, 22):
+            d.line([(x, yy), (min(x + 10, x1_vao - 6), yy)], fill=cor, width=4)
     montada.save(TMP / "retorno_zoom.png")
 
     # Figura 7: detalhe com nomes legíveis (combustíveis primários e primeiras tecnologias).
@@ -587,7 +604,8 @@ def retorno(prs):
         "eletricidade, que está no estágio 2. Isso não é erro do modelo: a energia segue o "
         "sentido normal, do gás para a eletricidade. Mas, como as colunas seguem o estágio, a "
         "entrada fica à direita da saída, e a linha precisa voltar para a esquerda, contornando "
-        "as caixas. O cálculo detecta esses casos comparando os estágios de entrada e saída, "
+        "as caixas. A faixa cinza é só um trecho omitido da figura, onde ficam outras colunas "
+        "do estágio 3, para caber o zoom. O cálculo detecta esses casos comparando os estágios de entrada e saída, "
         "sem o usuário declarar nada. No sistema de validação há quatro casos, todos desenhados "
         "automaticamente."))
     arq = TMP / "retorno_zoom.png"
@@ -605,9 +623,12 @@ def retorno(prs):
     texto(s, xpos(F4_X_TERMICAS) - 1.4, yl, 2.8, 0.35,
           [[("termelétricas a gás natural", {"negrito": True})]], tam=13, cor=CAIXA_TXT,
           alinhar=PP_ALIGN.CENTER)
-    texto(s, xpos(F4_X_ELETRICIDADE) - 1.4, yl, 2.8, 0.35,
+    texto(s, xpos(F4_X_ELETRICIDADE) - 1.2, yl, 2.4, 0.35,
           [[("↑  eletricidade (estágio 2)", {"negrito": True})]], tam=13, cor=COR_ELETRICIDADE,
           alinhar=PP_ALIGN.CENTER)
+    x_vao = X0 + (F4_ESQ[1] - F4_ESQ[0] + F4_VAO / 2) * esc
+    texto(s, x_vao - 0.7, yl, 1.4, 0.35, [[("↑  trecho omitido", {"italico": True})]],
+          tam=12, cor=CINZA_TXT, alinhar=PP_ALIGN.CENTER)
 
     cartoes = [
         ("O que acontece", "A termelétrica usa gás processado (estágio 3) para gerar "
